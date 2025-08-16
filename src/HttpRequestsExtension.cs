@@ -2,6 +2,7 @@
 using System;
 using System.Buffers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Soenneker.Extensions.Task;
 
@@ -25,6 +26,7 @@ public static class HttpRequestsExtension
     /// exceeds the limit.  
     /// If <c>null</c>, the entire body is read (subject to <see cref="int.MaxValue"/>).
     /// </param>
+    /// <param name="cancellationToken"></param>
     /// <returns>
     /// A <see cref="string"/> containing the decoded request body if successfully read.  
     /// Returns <c>string.Empty</c> when the body is empty.  
@@ -35,7 +37,7 @@ public static class HttpRequestsExtension
     /// Callers should ensure <see cref="HttpRequest.EnableBuffering"/> has been invoked
     /// earlier in the pipeline so that the request body stream is seekable.
     /// </remarks>
-    public static async ValueTask<string?> ReadBody(this HttpRequest request, int? maxBytes = null)
+    public static async ValueTask<string?> ReadBody(this HttpRequest request, int? maxBytes = null, CancellationToken cancellationToken = default)
     {
         long? cl = request.ContentLength;
 
@@ -64,7 +66,7 @@ public static class HttpRequestsExtension
                 var readTotal = 0;
                 while (readTotal < toRead)
                 {
-                    int read = await request.Body.ReadAsync(rented, readTotal, toRead - readTotal).NoSync();
+                    int read = await request.Body.ReadAsync(rented, readTotal, toRead - readTotal, cancellationToken).NoSync();
 
                     if (read == 0) 
                         break;
