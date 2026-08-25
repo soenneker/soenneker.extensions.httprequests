@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Soenneker.Extensions.Task;
+using Soenneker.Extensions.ValueTask;
 
 namespace Soenneker.Extensions.HttpRequests;
 
@@ -66,7 +67,7 @@ public static class HttpRequestsExtension
                 var readTotal = 0;
                 while (readTotal < toRead)
                 {
-                    int read = await request.Body.ReadAsync(rented, readTotal, toRead - readTotal, cancellationToken).NoSync();
+                    int read = await request.Body.ReadAsync(rented.AsMemory(readTotal, toRead - readTotal), cancellationToken).NoSync();
 
                     if (read == 0) 
                         break;
