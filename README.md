@@ -4,7 +4,7 @@
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.extensions.httprequests/codeql.yml?label=CodeQL&style=for-the-badge)](https://github.com/soenneker/soenneker.extensions.httprequests/actions/workflows/codeql.yml)
 
 # ![](https://user-images.githubusercontent.com/4441470/224455560-91ed3ee7-f510-4041-a8d2-3fc093025112.png) Soenneker.Extensions.HttpRequests
-A collection of helpful HttpRequest (from HttpContext) extension methods.
+Reads an ASP.NET Core request body for logging or inspection without leaving the stream at a different position.
 
 ## Installation
 
@@ -12,15 +12,18 @@ A collection of helpful HttpRequest (from HttpContext) extension methods.
 dotnet add package Soenneker.Extensions.HttpRequests
 ```
 
-## Quick start
+## Usage
 
 ```csharp
 using Soenneker.Extensions.HttpRequests;
 
-// Given an existing HttpRequest named request:
-var result = request.ReadBody();
+request.EnableBuffering();
+
+string? body = await request.ReadBody(maxBytes: 16_384, cancellationToken);
 ```
 
-## Common operations
+`ReadBody()` reads from position zero as UTF-8, then restores the stream's original position—even when reading fails. Call `EnableBuffering()` earlier in the pipeline; a non-seekable body returns `null`.
 
-- `ReadBody()` - Reads the request body as a UTF-8 string with optional truncation. Returns a `string` containing the decoded request body if successfully read. Returns `string.Empty` when the body is empty. Returns `null` if the body is non-seekable or too large to buffer safely.
+When `maxBytes` is set and the declared `Content-Length` is larger, the result ends with a notice such as ` [truncated 240 bytes]`. An absent or zero `Content-Length` returns `""` without reading. A body larger than `int.MaxValue` also returns `null` unless `maxBytes` brings the buffered size below that limit.
+
+This method relies on the declared `Content-Length`; it is not intended for unknown-length/chunked bodies.
