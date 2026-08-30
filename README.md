@@ -24,6 +24,6 @@ string? body = await request.ReadBody(maxBytes: 16_384, cancellationToken);
 
 `ReadBody()` reads from position zero as UTF-8, then restores the stream's original position—even when reading fails. Call `EnableBuffering()` earlier in the pipeline; a non-seekable body returns `null`.
 
-When `maxBytes` is set and the declared `Content-Length` is larger, the result ends with a notice such as ` [truncated 240 bytes]`. An absent or zero `Content-Length` returns `""` without reading. A body larger than `int.MaxValue` also returns `null` unless `maxBytes` brings the buffered size below that limit.
+When `maxBytes` is set and the declared `Content-Length` is larger, the result ends with a notice such as ` [truncated 240 bytes]`. A non-positive limit is treated as zero and returns only that notice for a nonempty body. An absent or zero `Content-Length` returns `""` without reading. A body larger than `int.MaxValue` also returns `null` unless `maxBytes` brings the buffered size below that limit.
 
-This method relies on the declared `Content-Length`; it is not intended for unknown-length/chunked bodies.
+The limit counts bytes, not characters. Truncating in the middle of a multi-byte UTF-8 character can therefore produce the Unicode replacement character at the end of the preview. This method relies on the declared `Content-Length`; it is not intended for unknown-length/chunked bodies.

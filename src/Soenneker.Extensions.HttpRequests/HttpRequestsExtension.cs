@@ -24,7 +24,7 @@ public static class HttpRequestsExtension
     /// An optional maximum number of bytes to read from the request body.  
     /// If specified, only up to this many bytes are buffered and returned, and the
     /// string will be annotated with a truncation notice if the actual body length
-    /// exceeds the limit.  
+    /// exceeds the limit. Non-positive values are treated as zero.
     /// If <c>null</c>, the entire body is read (subject to <see cref="int.MaxValue"/>).
     /// </param>
     /// <param name="cancellationToken"></param>
@@ -35,7 +35,7 @@ public static class HttpRequestsExtension
     /// </returns>
     /// <remarks>
     /// The request stream position is reset to its original value after reading.
-    /// Callers should ensure <see cref="HttpRequest.EnableBuffering"/> has been invoked
+    /// Callers should ensure <see cref="HttpRequestRewindExtensions.EnableBuffering(HttpRequest)"/> has been invoked
     /// earlier in the pipeline so that the request body stream is seekable.
     /// </remarks>
     public static async ValueTask<string?> ReadBody(this HttpRequest request, int? maxBytes = null, CancellationToken cancellationToken = default)
@@ -53,7 +53,10 @@ public static class HttpRequestsExtension
 
         try
         {
-            long toReadLong = maxBytes.HasValue ? Math.Min(cl.Value, maxBytes.Value) : cl.Value;
+            long toReadLong = maxBytes.HasValue ? Math.Min(cl.Value, Math.Max(0, maxBytes.Value)) : cl.Value;
+
+            if (toReadLong == 0)
+                return $" [truncated {cl.Value} bytes]";
 
             if (toReadLong > int.MaxValue)
                 return null; // too large to buffer
