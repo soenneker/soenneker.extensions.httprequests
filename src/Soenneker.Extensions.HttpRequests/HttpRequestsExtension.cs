@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Buffers;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,7 +84,7 @@ public static class HttpRequestsExtension
                 string text = Encoding.UTF8.GetString(rented, 0, readTotal);
 
                 if (maxBytes.HasValue && cl.Value > readTotal)
-                    text += $" [truncated {cl.Value - readTotal} bytes]";
+                    text = string.Create(CultureInfo.InvariantCulture, $"{text} [truncated {cl.Value - readTotal} bytes]");
 
                 return text;
             }
