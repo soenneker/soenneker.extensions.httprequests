@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Buffers;
 using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
 
 namespace Soenneker.Extensions.HttpRequests;
