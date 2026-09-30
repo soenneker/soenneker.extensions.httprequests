@@ -9,7 +9,7 @@ namespace Soenneker.Extensions.HttpRequests.Tests;
 public sealed class HttpRequestsExtensionTests : UnitTest
 {
     [Test]
-    public async System.Threading.Tasks.Task Non_positive_limit_returns_a_zero_byte_preview(CancellationToken cancellationToken)
+    public async System.Threading.Tasks.ValueTask Non_positive_limit_returns_a_zero_byte_preview(CancellationToken cancellationToken)
     {
         byte[] body = Encoding.UTF8.GetBytes("hello");
         var context = new DefaultHttpContext();
